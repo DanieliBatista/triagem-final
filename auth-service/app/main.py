@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from app.infrastructure.database import engine, Base, get_db, UserTable, PatientTable
-from app.domain.security import gerar_hash_senha, criar_token_jwt, verificar_senha
+from app.infrastructure.database import engine, Base, get_db, UserTable
+from app.application.use_case import AuthUseCase 
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Serviço de Autenticação - D2")
+
+auth_use_case = AuthUseCase()
 
 class CadastroRequest(BaseModel):
     email: str
@@ -18,35 +20,27 @@ class LoginRequest(BaseModel):
     email: str
     senha: str
 
+
 @app.post("/v1/auth/cadastro", status_code=status.HTTP_201_CREATED)
 def cadastrar_paciente(dados: CadastroRequest, db: Session = Depends(get_db)):
+    # RN: Verifica se o e-mail já existe (Lógica simples que a API pode validar antes)
     if db.query(UserTable).filter(UserTable.email == dados.email).first():
         raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
     
-    novo_usuario = UserTable(
-        email=dados.email, 
-        senha_hash=gerar_hash_senha(dados.senha),
-        role="PACIENTE" 
-    )
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
-
-    novo_paciente = PatientTable(
-        user_id=novo_usuario.id,
-        nome=dados.nome,
-        idade=dados.idade,
-    )
-    db.add(novo_paciente)
-    db.commit()
-    
-    return {"status": "Sucesso", "usuario_id": novo_usuario.id}
+    try:
+        usuario = auth_use_case.registrar_paciente(db, dados)
+        return {"status": "Sucesso", "usuario_id": usuario.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno ao processar cadastro: {str(e)}")
 
 @app.post("/v1/auth/login")
-def login(email: str, senha: str, db: Session = Depends(get_db)):
-    usuario = db.query(UserTable).filter(UserTable.email == email).first()
-    if not usuario or not verificar_senha(senha, usuario.senha_hash):
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
+def login(dados: LoginRequest, db: Session = Depends(get_db)):
+    resultado = auth_use_case.login(db, dados.email, dados.senha)
     
-    token = criar_token_jwt({"sub": usuario.email, "role": usuario.role})
-    return {"access_token": token, "token_type": "bearer"}
+    if not resultado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Credenciais inválidas"
+        )
+    
+    return resultado

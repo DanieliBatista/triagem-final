@@ -18,6 +18,7 @@ async def realizar_triagem(dados: TriagemRequest):
         resultado = use_case.executar(
             dados.paciente_id, 
             dados.temperatura, 
+            dados.peso,
             dados.pressao_sistolica, 
             dados.dor_peito
         )

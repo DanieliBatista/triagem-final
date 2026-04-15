@@ -2,7 +2,8 @@ fastapi
 uvicorn
 pydantic>=2.10.0
 python-jose[cryptography]
-passlib[bcrypt]
+passlib
+bcrypt==4.3.0
 sqlalchemy
 psycopg2-binary
 python-dotenv

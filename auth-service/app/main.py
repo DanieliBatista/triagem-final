@@ -23,7 +23,6 @@ class LoginRequest(BaseModel):
 
 @app.post("/v1/auth/cadastro", status_code=status.HTTP_201_CREATED)
 def cadastrar_paciente(dados: CadastroRequest, db: Session = Depends(get_db)):
-    # RN: Verifica se o e-mail já existe (Lógica simples que a API pode validar antes)
     if db.query(UserTable).filter(UserTable.email == dados.email).first():
         raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
     

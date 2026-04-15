@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.infrastructure.database import engine, Base, get_db, UserTable
 from app.application.use_case import AuthUseCase 
 
@@ -11,14 +11,14 @@ app = FastAPI(title="Serviço de Autenticação - D2")
 auth_use_case = AuthUseCase()
 
 class CadastroRequest(BaseModel):
-    email: str
-    senha: str
-    nome: str
-    idade: int
+    email: str = Field(..., regex=r'^\S+@\S+\.\S+$', description="E-mail válido")
+    senha: str = Field(..., min_length=6, description="Senha com no mínimo 6 caracteres")
+    nome: str = Field(..., max_length=100, description="Nome completo")
+    idade: int = Field(..., ge=0, description="Idade válida")
 
 class LoginRequest(BaseModel):
-    email: str
-    senha: str
+    email: str = Field(..., regex=r'^\S+@\S+\.\S+$', description="E-mail válido")
+    senha: str = Field(..., min_length=6, description="Senha com no mínimo 6 caracteres")
 
 
 @app.post("/v1/auth/cadastro", status_code=status.HTTP_201_CREATED)

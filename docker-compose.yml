@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    env_file: .env 
+    ports:
+      - "5432:5432"
+    networks:
+      - medsync_network
+
+  d2:
+    build: ./auth-service
+    container_name: d2_auth
+    ports:
+      - "3000:3000"
+    env_file: .env 
+    depends_on:
+      - db
+    networks:
+      - medsync_network
+
+  d1:
+    build: ./triagem-service
+    container_name: d1_triagem
+    ports:
+      - "5000:8000"
+    env_file: .env
+    depends_on:
+      - d2
+    networks:
+      - medsync_network
+
+  d3: 
+    build: ./prontuario-service
+    container_name: d3_prontuario
+    ports:
+      - "8080:8000"
+    env_file: .env
+    depends_on:
+      - d2
+    networks:
+      - medsync_network
+
+networks:
+  medsync_network:
+    driver: bridge

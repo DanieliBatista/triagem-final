@@ -11,13 +11,13 @@ app = FastAPI(title="Serviço de Autenticação - D2")
 auth_use_case = AuthUseCase()
 
 class CadastroRequest(BaseModel):
-    email: str = Field(..., regex=r'^\S+@\S+\.\S+$', description="E-mail válido")
+    email: str = Field(..., pattern=r'^\S+@\S+\.\S+$', description="E-mail válido")
     senha: str = Field(..., min_length=6, description="Senha com no mínimo 6 caracteres")
     nome: str = Field(..., max_length=100, description="Nome completo")
     idade: int = Field(..., ge=0, description="Idade válida")
 
 class LoginRequest(BaseModel):
-    email: str = Field(..., regex=r'^\S+@\S+\.\S+$', description="E-mail válido")
+    email: str = Field(..., pattern=r'^\S+@\S+\.\S+$', description="E-mail válido")
     senha: str = Field(..., min_length=6, description="Senha com no mínimo 6 caracteres")
 
 

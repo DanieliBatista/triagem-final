@@ -1,9 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from app.application.use_cases import RealizarTriagemUseCase 
 
 app = FastAPI(title="Microsserviço de Triagem")
 use_case = RealizarTriagemUseCase() 
+
+security = HTTPBearer()
 
 class TriagemRequest(BaseModel):
     paciente_id: int
@@ -13,7 +16,7 @@ class TriagemRequest(BaseModel):
     dor_peito: bool
 
 @app.post("/v1/triagem")
-async def realizar_triagem(dados: TriagemRequest):
+async def realizar_triagem(dados: TriagemRequest, token=Depends(security)):
     try:
         resultado = use_case.executar(
             dados.paciente_id, 

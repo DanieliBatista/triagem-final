@@ -40,6 +40,17 @@ services:
       - d2
     networks:
       - medsync_network
+    
+  d4:
+    build: ./classificacao-service
+    container_name: d4_classificacao
+    ports:
+      - "5001:8000"
+    env_file: .env
+    depends_on:
+      - d2
+    networks:
+      - medsync_network
 
 networks:
   medsync_network:

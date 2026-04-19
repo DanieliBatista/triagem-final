@@ -11,25 +11,27 @@ class AuthUseCase:
         
         token = criar_token_jwt({"sub": usuario.email, "role": usuario.role})
         return {"access_token": token, "token_type": "bearer"}
-
-    def registrar_paciente(self, db: Session, dados):
+    
+    def registrar_usuario(self, db: Session, dados): 
         hash_senha = gerar_hash_senha(dados.senha)
         
         novo_usuario = UserTable(
             email=dados.email, 
             senha_hash=hash_senha, 
-            role="PACIENTE"
+            role=dados.role,   
+            crm=dados.crm
         )
         db.add(novo_usuario)
         db.commit()
         db.refresh(novo_usuario)
 
-        novo_paciente = PatientTable(
-            user_id=novo_usuario.id, 
-            nome=dados.nome, 
-            idade=dados.idade
-        )
-        db.add(novo_paciente)
-        db.commit()
+        if dados.role == "PACIENTE":
+            novo_paciente = PatientTable(
+                user_id=novo_usuario.id, 
+                nome=dados.nome, 
+                idade=dados.idade
+            )
+            db.add(novo_paciente)
+            db.commit()
         
         return novo_usuario

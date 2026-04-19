@@ -17,6 +17,7 @@ class UserTable(Base):
     email = Column(String, unique=True, index=True)
     senha_hash = Column(String)
     role = Column(String)
+    crm = Column(String, nullable=True)
 
 class PatientTable(Base):
     __tablename__ = "patients"

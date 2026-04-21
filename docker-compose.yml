@@ -1,57 +1,133 @@
+version: '3.8'
+
 services:
+  # PostgreSQL Database
   db:
     image: postgres:15
-    container_name: postgres_db
-    env_file: .env 
+    container_name: medsync_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - medsync_network
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: medsync_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medsync_network
+
+  # Auth Service (D2)
   d2:
     build: ./auth-service
     container_name: d2_auth
     ports:
       - "3000:8000"
-    env_file: .env 
+    environment:
+      DATABASE_URL: ${AUTH_DATABASE_URL}
+      SECRET_KEY: ${JWT_SECRET}
+      ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - medsync_network
+    restart: unless-stopped
 
+  # Triagem Service (D1)
   d1:
     build: ./triagem-service
     container_name: d1_triagem
     ports:
       - "5000:8000"
-    env_file: .env
+    environment:
+      DATABASE_URL: ${TRIAGEM_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      CLASSIFICACAO_SERVICE_URL: http://d1_classificacao:8000
+      SQLALCHEMY_ECHO: "false"
     depends_on:
-      - d2
+      db:
+        condition: service_healthy
+      d2:
+        condition: service_started
+      d4:
+        condition: service_started
     networks:
       - medsync_network
+    restart: unless-stopped
 
-  d3: 
+  # Prontuário Service (D3)
+  d3:
     build: ./prontuario-service
     container_name: d3_prontuario
     ports:
       - "8080:8000"
-    env_file: .env
+    environment:
+      DATABASE_URL: ${PRONTUARIO_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      RABBITMQ_URL: ${RABBITMQ_URL}
     depends_on:
-      - d2
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      d2:
+        condition: service_started
     networks:
       - medsync_network
-    
+    restart: unless-stopped
+
   d4:
     build: ./classificacao-service
     container_name: d4_classificacao
     ports:
-      - "5001:8000"
-    env_file: .env
+      - "5002:8000"
+    environment:
+      DATABASE_URL: ${CLASSIFICACAO_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      CRITICAL_CAPACITY_LIMIT: ${CRITICAL_CAPACITY_LIMIT}
+      TRIAGE_VALIDITY_HOURS: ${TRIAGE_VALIDITY_HOURS}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
-      - d2
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      d2:
+        condition: service_started
     networks:
       - medsync_network
-
+    restart: unless-stopped
 networks:
   medsync_network:
     driver: bridge
+
+volumes:
+  postgres_data:

@@ -5,7 +5,9 @@ pydantic-settings
 python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
+PyJWT>=2.12.1
 sqlalchemy
+psycopg[binary]>=2.9
 databases
 pytest
 pytest-cov

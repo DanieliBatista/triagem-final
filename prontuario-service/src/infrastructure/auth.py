@@ -1,3 +1,4 @@
+import os
 import jwt
 from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -5,9 +6,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # Configuração do esquema de segurança (Bearer Token)
 reusable_oauth2 = HTTPBearer()
 
-# EM PRODUÇÃO: Essa chave deve ser igual à do Serviço de Autenticação e vir do .env
-SECRET_KEY = "chave_secreta_do_grupo"
-ALGORITHM = "HS256"
+# Carregar do .env para consistência com outros serviços
+SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-change-in-production")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 def get_current_user_role(res: HTTPAuthorizationCredentials = Security(reusable_oauth2)) -> str:
     """

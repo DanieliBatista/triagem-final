@@ -1,4 +1,3 @@
-"""Entidades do Domain"""
 from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -9,13 +8,11 @@ from .value_objects import SinaisVitais
 
 
 def _utcnow() -> datetime:
-    """Retornar timestamp UTC atual"""
     return datetime.now(timezone.utc)
 
 
 @dataclass
 class Classificacao:
-    """Entidade que representa uma classificação de paciente"""
     paciente_id: str
     sinais_vitais: SinaisVitais
     cor_risco: RiskColor
@@ -23,7 +20,6 @@ class Classificacao:
     usuario_id: str = "sistema"
     tipo_mudanca: TipoMudanca = TipoMudanca.AUTOMATICA
 
-    # Metadata
     id: UUID = field(default_factory=uuid4)
     data_criacao: datetime = field(default_factory=_utcnow)
     data_atualizacao: datetime = field(default_factory=_utcnow)
@@ -31,8 +27,13 @@ class Classificacao:
     requer_retriage: bool = False
 
     def verificar_expiracao(self) -> None:
-        """RN03: Verificar se triagem expirou (4 horas)"""
-        limite = self.data_criacao + timedelta(hours=TEMPO_VALIDADE_HORAS)
+        criacao = self.data_criacao
+        if criacao.tzinfo is None:
+            from datetime import timezone
+            criacao = criacao.replace(tzinfo=timezone.utc)
+            
+        limite = criacao + timedelta(hours=TEMPO_VALIDADE_HORAS)
+        
         if _utcnow() > limite:
             self.status = StatusClassificacao.EXPIRADO
             self.requer_retriage = True
@@ -44,7 +45,6 @@ class Classificacao:
         usuario_id: str,
         justificativa: str = ""
     ) -> None:
-        """Reclassificar um paciente manualmente"""
         self.cor_risco = nova_cor
         self.tempo_espera_minutos = novo_tempo_espera
         self.usuario_id = usuario_id
@@ -52,7 +52,6 @@ class Classificacao:
         self.data_atualizacao = _utcnow()
 
     def escalar(self) -> bool:
-        """RN06: Escalar automaticamente se tempo expirou"""
         tempo_decorrido = (_utcnow() - self.data_criacao).total_seconds() / 60
 
         escalacoes = {
@@ -84,7 +83,6 @@ class Classificacao:
         return False
 
     def para_dict(self) -> dict:
-        """Converter entidade para dicionário"""
         return {
             "id": str(self.id),
             "paciente_id": self.paciente_id,

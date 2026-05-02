@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class StatusClassificacao(str, Enum):
-    """Status de uma classificação"""
     ATIVO = "ATIVO"
     EXPIRADO = "EXPIRADO"
     COMPLETO = "COMPLETO"
@@ -10,7 +9,6 @@ class StatusClassificacao(str, Enum):
 
 
 class TipoMudanca(str, Enum):
-    """Tipo de mudança em uma classificação"""
     AUTOMATICA = "AUTOMATICA"
     MANUAL = "MANUAL"
     ESCALACAO = "ESCALACAO"

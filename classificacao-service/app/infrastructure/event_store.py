@@ -1,4 +1,3 @@
-"""Event Store para auditoria completa"""
 from datetime import datetime
 from sqlalchemy.orm import Session
 
@@ -6,13 +5,10 @@ from app.infrastructure.database import AuditoriaModel, SessionLocal
 
 
 class ArmazenadorEventos:
-    """Armazena todos os eventos para auditoria (RN05)"""
-
     def __init__(self, sessao: Session = None):
         self.sessao = sessao or SessionLocal()
 
     async def registrar(self, auditoria: dict) -> None:
-        """RN05: Registrar auditoria completa"""
         model = AuditoriaModel(
             classificacao_id=auditoria.get("classificacao_id"),
             acao=auditoria.get("acao"),
@@ -30,7 +26,6 @@ class ArmazenadorEventos:
         self.sessao.commit()
 
     async def obter_por_classificacao(self, classificacao_id: str) -> list:
-        """Obter todo o histórico de auditoria de uma classificação"""
         models = self.sessao.query(AuditoriaModel).filter(
             AuditoriaModel.classificacao_id == classificacao_id
         ).order_by(AuditoriaModel.timestamp.asc()).all()
@@ -51,5 +46,4 @@ class ArmazenadorEventos:
         ]
 
     def fechar(self):
-        """Fechar sessão"""
         self.sessao.close()

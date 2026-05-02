@@ -1,4 +1,3 @@
-"""Setup de banco de dados com SQLAlchemy"""
 from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -8,24 +7,17 @@ from uuid import uuid4
 from app.infrastructure.config import settings
 from app.domain.enums import StatusClassificacao, TipoMudanca, RiskColor
 
-
-# Setup Engine
 engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.SQLALCHEMY_ECHO,
     connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
 )
 
-# Setup Session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base para models
 Base = declarative_base()
 
-
-# ORM Models
 class ClassificacaoModel(Base):
-    """Model ORM para Classificacao"""
     __tablename__ = "classificacoes"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
@@ -36,7 +28,6 @@ class ClassificacaoModel(Base):
     tipo_mudanca = Column(String(20), default=TipoMudanca.AUTOMATICA.value)
     usuario_id = Column(String(100), default="sistema")
 
-    # Sinais vitais
     temperatura = Column(Float, nullable=False)
     pressao_sistolica = Column(Integer, nullable=False)
     pressao_diastolica = Column(Integer, nullable=False)
@@ -44,14 +35,12 @@ class ClassificacaoModel(Base):
     frequencia_cardiaca = Column(Integer, nullable=False)
     dor_peito = Column(Boolean, default=False)
 
-    # Metadata
     data_criacao = Column(DateTime, default=datetime.utcnow, nullable=False)
     data_atualizacao = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     requer_retriage = Column(Boolean, default=False)
 
 
 class AuditoriaModel(Base):
-    """Model ORM para auditoria (Event Store)"""
     __tablename__ = "auditoria"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
@@ -68,12 +57,10 @@ class AuditoriaModel(Base):
 
 
 def criar_tabelas():
-    """Criar todas as tabelas"""
     Base.metadata.create_all(bind=engine)
 
 
 def obter_sessao():
-    """Dependency para obter sessão"""
     db = SessionLocal()
     try:
         yield db

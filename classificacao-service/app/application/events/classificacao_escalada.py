@@ -1,4 +1,4 @@
-"""Evento de escalação automática"""
+
 from dataclasses import dataclass
 
 from app.shared.cqrs import Evento
@@ -6,7 +6,6 @@ from app.shared.cqrs import Evento
 
 @dataclass
 class ClassificacaoEscaladaEvento(Evento):
-    """Evento: Classificação foi escalada automaticamente"""
     classificacao_id: str = ""
     paciente_id: str = ""
     cor_anterior: str = ""

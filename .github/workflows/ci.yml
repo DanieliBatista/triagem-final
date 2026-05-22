@@ -17,6 +17,12 @@ jobs:
   # ==========================================
   build-and-test:
     runs-on: ubuntu-latest
+    
+    # IMPORTANTE: Diz ao GitHub para rodar os comandos dentro do seu serviço
+    defaults:
+      run:
+        working-directory: ./classificacao-service
+
     steps:
       - name: Baixar o código do repositório
         uses: actions/checkout@v4
@@ -24,26 +30,24 @@ jobs:
       - name: Configurar o Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Versão que vocês estão usando
+          python-version: '3.12' # Versão que vocês estão a usar
 
       - name: Instalar dependências da aplicação
         run: |
           python -m pip install --upgrade pip
-          # Ajuste o caminho do requirements se ele estiver dentro de alguma subpasta
           pip install -r requirements.txt 
           pip install pytest pytest-cov httpx
 
       - name: Rodar Testes e gerar relatório de cobertura
         run: |
-          # O parâmetro --cov-report=xml é crucial para o SonarCloud conseguir ler!
           python -m pytest tests/ --cov=app --cov-report=xml
 
-      # Salva o arquivo de cobertura temporariamente para o próximo Job usar
+      # Ajuste no caminho do artefacto para a pasta correta
       - name: Salvar relatório de cobertura
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage.xml
+          path: ./classificacao-service/coverage.xml
 
   # ==========================================
   # JOB 2: ANÁLISE DE QUALIDADE (SONARCLOUD)
@@ -60,26 +64,27 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
+          path: ./classificacao-service # Descarrega o ficheiro na mesma subpasta
 
       - name: Análise no SonarCloud
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # O GitHub gera sozinho
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Você precisará criar no SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=DanieliBatista_triagem-final
             -Dsonar.organization=danielibatista
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.sources=app
-            -Dsonar.tests=tests
+            -Dsonar.python.coverage.reportPaths=classificacao-service/coverage.xml
+            -Dsonar.sources=classificacao-service/app
+            -Dsonar.tests=classificacao-service/tests
+
   # ==========================================
   # JOB 3: VERSIONAMENTO SEMÂNTICO
   # ==========================================
   versionamento:
-    needs: sonarcloud # Só cria versão se o código for aprovado com qualidade
+    needs: sonarcloud # Só cria versão se o código for aprovado
     runs-on: ubuntu-latest
-    # Só gera versão nova se o código estiver indo para a branch 'main' (produção)
     if: github.ref == 'refs/heads/main' 
     steps:
       - uses: actions/checkout@v4
@@ -88,4 +93,4 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: minor # Cria versões tipo v1.1.0, v1.2.0, etc.
+          default_bump: minor

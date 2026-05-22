@@ -1,4 +1,4 @@
-name: CI - Integracao Continua
+name: CI - Triagem Service
 
 # 1. Quando este pipeline vai rodar?
 on:
@@ -6,10 +6,14 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - 'triagem-service/**' # DICA DE OURO: Só roda se alterar algo na Triagem!
   pull_request:
     branches:
       - main
       - develop
+    paths:
+      - 'triagem-service/**'
 
 jobs:
   # ==========================================
@@ -18,10 +22,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     
-    # IMPORTANTE: Diz ao GitHub para rodar os comandos dentro do seu serviço
+    # Apontando para a pasta correta do seu microsserviço
     defaults:
       run:
-        working-directory: ./classificacao-service
+        working-directory: ./triagem-service
 
     steps:
       - name: Baixar o código do repositório
@@ -30,7 +34,7 @@ jobs:
       - name: Configurar o Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Versão que vocês estão a usar
+          python-version: '3.12'
 
       - name: Instalar dependências da aplicação
         run: |
@@ -42,29 +46,29 @@ jobs:
         run: |
           python -m pytest tests/ --cov=app --cov-report=xml
 
-      # Ajuste no caminho do artefacto para a pasta correta
+      # Salvando da pasta da triagem
       - name: Salvar relatório de cobertura
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: ./classificacao-service/coverage.xml
+          name: coverage-report-triagem
+          path: ./triagem-service/coverage.xml
 
   # ==========================================
   # JOB 2: ANÁLISE DE QUALIDADE (SONARCLOUD)
   # ==========================================
   sonarcloud:
-    needs: build-and-test # Só roda se os testes passarem!
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Necessário para o Sonar analisar o histórico
+          fetch-depth: 0
 
       - name: Recuperar relatório de cobertura
         uses: actions/download-artifact@v4
         with:
-          name: coverage-report
-          path: ./classificacao-service # Descarrega o ficheiro na mesma subpasta
+          name: coverage-report-triagem
+          path: ./triagem-service
 
       - name: Análise no SonarCloud
         uses: SonarSource/sonarcloud-github-action@master
@@ -75,15 +79,15 @@ jobs:
           args: >
             -Dsonar.projectKey=DanieliBatista_triagem-final
             -Dsonar.organization=danielibatista
-            -Dsonar.python.coverage.reportPaths=classificacao-service/coverage.xml
-            -Dsonar.sources=classificacao-service/app
-            -Dsonar.tests=classificacao-service/tests
+            -Dsonar.python.coverage.reportPaths=triagem-service/coverage.xml
+            -Dsonar.sources=triagem-service/app
+            -Dsonar.tests=triagem-service/tests
 
   # ==========================================
   # JOB 3: VERSIONAMENTO SEMÂNTICO
   # ==========================================
   versionamento:
-    needs: sonarcloud # Só cria versão se o código for aprovado
+    needs: sonarcloud
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' 
     steps:

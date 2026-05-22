@@ -66,7 +66,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # O GitHub gera sozinho
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Você precisará criar no SonarCloud
-
+        with:
+          args: >
+            -Dsonar.projectKey=DanieliBatista_triagem-final
+            -Dsonar.organization=danielibatista
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
   # ==========================================
   # JOB 3: VERSIONAMENTO SEMÂNTICO
   # ==========================================

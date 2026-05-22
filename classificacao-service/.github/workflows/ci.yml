@@ -1,0 +1,85 @@
+name: CI - Integracao Continua
+
+# 1. Quando este pipeline vai rodar?
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ==========================================
+  # JOB 1: BUILD E TESTES AUTOMATIZADOS
+  # ==========================================
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # Versão que vocês estão usando
+
+      - name: Instalar dependências da aplicação
+        run: |
+          python -m pip install --upgrade pip
+          # Ajuste o caminho do requirements se ele estiver dentro de alguma subpasta
+          pip install -r requirements.txt 
+          pip install pytest pytest-cov httpx
+
+      - name: Rodar Testes e gerar relatório de cobertura
+        run: |
+          # O parâmetro --cov-report=xml é crucial para o SonarCloud conseguir ler!
+          python -m pytest tests/ --cov=app --cov-report=xml
+
+      # Salva o arquivo de cobertura temporariamente para o próximo Job usar
+      - name: Salvar relatório de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ==========================================
+  # JOB 2: ANÁLISE DE QUALIDADE (SONARCLOUD)
+  # ==========================================
+  sonarcloud:
+    needs: build-and-test # Só roda se os testes passarem!
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para o Sonar analisar o histórico
+
+      - name: Recuperar relatório de cobertura
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: Análise no SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # O GitHub gera sozinho
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Você precisará criar no SonarCloud
+
+  # ==========================================
+  # JOB 3: VERSIONAMENTO SEMÂNTICO
+  # ==========================================
+  versionamento:
+    needs: sonarcloud # Só cria versão se o código for aprovado com qualidade
+    runs-on: ubuntu-latest
+    # Só gera versão nova se o código estiver indo para a branch 'main' (produção)
+    if: github.ref == 'refs/heads/main' 
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Criar Tag de Versão Automática
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: minor # Cria versões tipo v1.1.0, v1.2.0, etc.

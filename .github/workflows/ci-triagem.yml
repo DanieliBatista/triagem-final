@@ -70,7 +70,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_TRIAGEM }}
         with:
           args: >
-            -Dsonar.projectBaseDir=triagem-service
             -Dsonar.projectKey=DanieliBatista_triagem-final_triagem-service
             -Dsonar.organization=danielibatista
             -Dsonar.projectName=triagem-service

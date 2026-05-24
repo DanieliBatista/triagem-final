@@ -78,7 +78,14 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: triagem-service
+           args: >
+            -Dsonar.projectBaseDir=triagem-service
+            -Dsonar.projectKey=DanieliBatista_triagem-final
+            -Dsonar.organization=danielibatista
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
+            -Dsonar.python.coverage.reportPaths=triagem-service/coverage.xml
+          
 
   # ==========================================
   # JOB 3: VERSIONAMENTO SEMÂNTICO

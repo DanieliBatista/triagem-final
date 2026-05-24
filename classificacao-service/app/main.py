@@ -1,4 +1,3 @@
-"""Aplicação FastAPI - classificacao-service"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,7 +45,6 @@ app.include_router(router)
 # Health check
 @app.get("/health")
 def health():
-    """Health check endpoint"""
     return {
         "status": "ok",
         "servico": "classificacao-service",
@@ -57,7 +55,6 @@ def health():
 # Root endpoint
 @app.get("/")
 def root():
-    """Root endpoint com informações do serviço"""
     return {
         "servico": "MedSync – Classificação",
         "versao": "2.0.0",

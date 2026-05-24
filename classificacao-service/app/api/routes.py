@@ -1,4 +1,3 @@
-"""Routes da API"""
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from uuid import UUID
 
@@ -33,8 +32,6 @@ from app.infrastructure.database import SessionLocal
 
 router = APIRouter(prefix="/v1/classificacoes", tags=["Classificações"])
 
-
-# Factory para dependências
 def obter_repositorio():
     return RepositorioClassificacao(SessionLocal())
 
@@ -44,7 +41,6 @@ def obter_event_store():
 
 
 def obter_despachador():
-    """Factory para despachador de eventos"""
     from app.infrastructure.despachador_eventos import DespachadorEventosMock
     return DespachadorEventosMock()
 
@@ -84,12 +80,6 @@ async def criar_classificacao(
     usuario = Depends(obter_usuario_atual),
     bus = Depends(obter_bus_comandos),
 ):
-    """
-    Criar nova classificação para um paciente
-
-    RF05: Criar e armazenar classificação
-    RN02: Protocolo de Manchester
-    """
     try:
         comando = CriarClassificacaoCommand(
             paciente_id=request.paciente_id,
@@ -119,46 +109,15 @@ async def criar_classificacao(
 
 @router.get("/status")
 async def obter_status_pacientes(usuario = Depends(obter_usuario_atual)):
-    """
-    RF03: Status de todos os pacientes - EXPANDIDO
-
-    Retorna TODOS os pacientes ativos, ORDENADOS por criticidade
-    (VERMELHO primeiro, depois LARANJA, AMARELO, VERDE, AZUL)
-
-    Response:
-    {
-        "timestamp": "ISO8601",
-        "total_pacientes_ativos": 15,
-        "pacientes_criticos": 3,  # RED + ORANGE
-        "limite_capacidade": 10,
-        "alerta": "CAPACIDADE_CRITICA" ou null,
-        "pacientes": [
-            {
-                "classificacao_id": "...",
-                "paciente_id": "PAC-001",
-                "cor_risco": "VERMELHO",
-                "tempo_espera_minutos": 0,
-                "data_criacao": "ISO8601",
-                "status": "ATIVO",
-                "sinais_vitais": {...},
-                "tempo_decorrido_minutos": 5
-            },
-            ...
-        ]
-    }
-    """
     from datetime import datetime
     from app.infrastructure.config import settings
 
     repositorio = RepositorioClassificacao(SessionLocal())
 
-    # Obter todas as classificações ativas ordenadas por urgência
     classificacoes = await repositorio.obter_todas_ativas_ordenadas()
 
-    # Contar críticas
     criticos = await repositorio.contar_criticas()
 
-    # Preparar resposta
     agora = datetime.utcnow()
     pacientes = []
 
@@ -190,11 +149,7 @@ async def obter_status_pacientes(usuario = Depends(obter_usuario_atual)):
 
 @router.get("/capacity/status")
 async def capacity_status(usuario = Depends(obter_usuario_atual)):
-    """
-    RF03: Status de capacidade da unidade (versão simples)
 
-    Retorna número de pacientes críticos e alerta se ultrapassou limite
-    """
     repositorio = RepositorioClassificacao(SessionLocal())
     count = await repositorio.contar_criticas()
 
@@ -215,7 +170,6 @@ async def obter_classificacao(
     usuario = Depends(obter_usuario_atual),
     bus = Depends(obter_bus_consultas),
 ):
-    """Obter classificação específica"""
     try:
         consulta = ObterClassificacaoQuery(classificacao_id=classificacao_id)
         resultado = await bus.executar(consulta)
@@ -235,12 +189,7 @@ async def reclassificar(
     req: Request = None,
     bus = Depends(obter_bus_comandos),
 ):
-    """
-    Reclassificar um paciente manualmente
 
-    RF06: Permitir reclassificação manual com justificativa
-    RN05: Registrar auditoria
-    """
     try:
         comando = ReclassificarManualmenteCommand(
             classificacao_id=classificacao_id,

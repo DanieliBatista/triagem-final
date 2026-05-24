@@ -1,4 +1,3 @@
-"""Value Objects do domain"""
 from dataclasses import dataclass
 from .enums import RiskColor
 from .exceptions import ValidacaoBiologicaException
@@ -15,7 +14,6 @@ LIMITES_VITAIS = {
 
 @dataclass(frozen=True)
 class SinaisVitais:
-    """Sinais vitais do paciente - Value Object (imutável)"""
     temperatura: float
     pressao_sistolica: int
     pressao_diastolica: int
@@ -24,7 +22,6 @@ class SinaisVitais:
     dor_peito: bool = False
 
     def __post_init__(self):
-        """Validar sinais vitais após inicialização"""
         validacoes = {
             "temperatura": self.temperatura,
             "pressao_sistolica": self.pressao_sistolica,
@@ -42,7 +39,6 @@ class SinaisVitais:
                 )
 
     def para_dict(self) -> dict:
-        """Converter para dicionário"""
         return {
             "temperatura": self.temperatura,
             "pressao_sistolica": self.pressao_sistolica,
@@ -54,24 +50,12 @@ class SinaisVitais:
 
 
 def classificar_paciente(sinais: SinaisVitais) -> RiskColor:
-    """
-    Classificar paciente segundo Protocolo de Manchester
-
-    RN02: Lógica de Priorização
-    - Dor no peito OU PAS > 180 → VERMELHO
-    - Febre > 38.5°C → LARANJA
-    - FC > 120 OU PAS > 160 → AMARELO
-    - Febre > 37.5 OU FC > 100 → VERDE
-    - Caso contrário → AZUL
-    - Se SpO2 < 92% → Escala uma categoria acima
-    """
     cor = _classificacao_base(sinais)
     cor = _aplicar_escalacao_saturacao(cor, sinais.saturacao_oxigenio)
     return cor
 
 
 def _classificacao_base(sinais: SinaisVitais) -> RiskColor:
-    """Classificação base sem considerar saturação"""
     if sinais.dor_peito or sinais.pressao_sistolica > 180:
         return RiskColor.RED
 
@@ -88,7 +72,6 @@ def _classificacao_base(sinais: SinaisVitais) -> RiskColor:
 
 
 def _aplicar_escalacao_saturacao(cor: RiskColor, saturacao: float) -> RiskColor:
-    """Aplicar escalação automática se saturação < 92%"""
     if saturacao >= 92.0:
         return cor
 
@@ -103,7 +86,6 @@ def _aplicar_escalacao_saturacao(cor: RiskColor, saturacao: float) -> RiskColor:
 
 
 def obter_tempo_espera(cor: RiskColor) -> int:
-    """Obter tempo estimado de espera em minutos"""
     tempos = {
         RiskColor.RED: 0,
         RiskColor.ORANGE: 10,

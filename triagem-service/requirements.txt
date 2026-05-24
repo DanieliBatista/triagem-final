@@ -8,6 +8,7 @@ passlib[bcrypt]
 PyJWT>=2.12.1
 sqlalchemy
 psycopg[binary]>=2.9
+psycopg2-binary
 databases
 pytest
 pytest-cov

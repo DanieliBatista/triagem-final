@@ -25,5 +25,4 @@ def get_current_user(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
-# Alias em português para consistência
 obter_usuario_atual = get_current_user

@@ -67,7 +67,7 @@ services:
       DATABASE_URL: ${TRIAGEM_DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
-      CLASSIFICACAO_SERVICE_URL: http://d1_classificacao:8000
+      CLASSIFICACAO_SERVICE_URL: http://d4_classificacao:8000
       SQLALCHEMY_ECHO: "false"
     depends_on:
       db:

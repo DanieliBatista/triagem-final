@@ -1,0 +1,31 @@
+name: CI-classificacao
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v8.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_CLASSIFICACAO }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=.
+            -Dsonar.projectKey=danielibatista_triagem-final_classificacao-service
+            -Dsonar.organization=danielibatista
+            -Dsonar.projectName=classificacao-service
+            -Dsonar.sources=classificacao-service/app
+            -Dsonar.tests=classificacao-service/tests
+            -Dsonar.python.coverage.reportPaths=classificacao-service/coverage.xml

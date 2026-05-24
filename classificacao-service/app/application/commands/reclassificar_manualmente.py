@@ -1,4 +1,3 @@
-"""Comando para reclassificar paciente manualmente"""
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -11,7 +10,6 @@ from app.shared.cqrs import Comando, ManipuladorComando, Evento
 
 @dataclass
 class ReclassificarManualmenteCommand(Comando):
-    """Comando para reclassificar um paciente manualmente"""
     classificacao_id: str
     nova_cor: str
     usuario_id: str
@@ -23,7 +21,6 @@ class ReclassificarManualmenteCommand(Comando):
 
 @dataclass
 class ClassificacaoAlteradaManualmenteEvento(Evento):
-    """Evento: Classificação foi alterada manualmente"""
     classificacao_id: str = ""
     paciente_id: str = ""
     cor_anterior: str = ""
@@ -50,44 +47,33 @@ class ClassificacaoAlteradaManualmenteEvento(Evento):
 
 
 class ReclassificarManualmenteManipulador(ManipuladorComando):
-    """Manipulador para reclassificar manualmente"""
-
     def __init__(self, repositorio, event_store, despachador):
         self.repositorio = repositorio
         self.event_store = event_store
         self.despachador = despachador
 
     async def manipular(self, comando: ReclassificarManualmenteCommand) -> dict:
-        """
-        Reclassificar um paciente manualmente
 
-        RF06: Permitir reclassificação manual
-        RN05: Registrar auditoria
-        """
-        # 1. Validar permissão (apenas MEDICO)
         if comando.usuario_role != "MEDICO":
             raise PermissaoNegadaException(
                 "Apenas médicos podem reclassificar pacientes"
             )
 
-        # 2. Validar justificativa obrigatória
         if not comando.justificativa or len(comando.justificativa.strip()) < 5:
             raise JustificativaObrigatoriaException(
                 "Justificativa obrigatória com mínimo 5 caracteres"
             )
 
-        # 3. Obter classificação atual
         classificacao = await self.repositorio.obter_por_id(comando.classificacao_id)
         if not classificacao:
             raise ValueError(f"Classificação {comando.classificacao_id} não encontrada")
 
-        # 4. Registrar auditoria (antes de alterar)
         auditoria = {
             "acao": "RECLASSIFICACAO_MANUAL",
             "usuario_id": comando.usuario_id,
             "usuario_email": comando.usuario_email,
             "usuario_role": comando.usuario_role,
-            "timestamp": None,  # event_store define
+            "timestamp": None,
             "classificacao_id": comando.classificacao_id,
             "cor_anterior": classificacao.cor_risco.value,
             "cor_nova": comando.nova_cor,
@@ -96,7 +82,6 @@ class ReclassificarManualmenteManipulador(ManipuladorComando):
         }
         await self.event_store.registrar(auditoria)
 
-        # 5. Atualizar classificação
         cor_anterior = classificacao.cor_risco.value
         nova_cor_enum = RiskColor(comando.nova_cor)
         novo_tempo = obter_tempo_espera(nova_cor_enum)
@@ -108,10 +93,8 @@ class ReclassificarManualmenteManipulador(ManipuladorComando):
             justificativa=comando.justificativa,
         )
 
-        # 6. Salvar no repositório
         await self.repositorio.salvar(classificacao)
 
-        # 7. Publicar evento para outros serviços
         evento = ClassificacaoAlteradaManualmenteEvento(
             classificacao_id=comando.classificacao_id,
             paciente_id=classificacao.paciente_id,
@@ -123,5 +106,4 @@ class ReclassificarManualmenteManipulador(ManipuladorComando):
         )
         await self.despachador.despachar(evento)
 
-        # 8. Retornar resultado
         return classificacao.para_dict()

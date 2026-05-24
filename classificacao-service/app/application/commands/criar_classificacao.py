@@ -1,4 +1,3 @@
-"""Comando para criar nova classificação"""
 from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
@@ -11,7 +10,6 @@ from app.shared.cqrs import Comando, ManipuladorComando, Evento
 
 @dataclass
 class CriarClassificacaoCommand(Comando):
-    """Comando para criar uma nova classificação"""
     paciente_id: str
     temperatura: float
     pressao_sistolica: int
@@ -24,7 +22,6 @@ class CriarClassificacaoCommand(Comando):
 
 @dataclass
 class ClassificacaoCriadaEvento(Evento):
-    """Evento: Classificação foi criada"""
     classificacao_id: str = ""
     paciente_id: str = ""
     cor_risco: str = ""
@@ -47,20 +44,12 @@ class ClassificacaoCriadaEvento(Evento):
 
 
 class CriarClassificacaoManipulador(ManipuladorComando):
-    """Manipulador para criar classificação"""
 
     def __init__(self, repositorio, despachador):
         self.repositorio = repositorio
         self.despachador = despachador
 
     async def manipular(self, comando: CriarClassificacaoCommand) -> dict:
-        """
-        Criar nova classificação baseado em sinais vitais
-
-        RF05: Criar e armazenar classificação
-        RN02: Aplicar Protocolo de Manchester
-        """
-        # 1. Criar sinais vitais (valida automaticamente)
         sinais = SinaisVitais(
             temperatura=comando.temperatura,
             pressao_sistolica=comando.pressao_sistolica,
@@ -70,11 +59,9 @@ class CriarClassificacaoManipulador(ManipuladorComando):
             dor_peito=comando.dor_peito,
         )
 
-        # 2. Classificar paciente
         cor_risco = classificar_paciente(sinais)
         tempo_espera = obter_tempo_espera(cor_risco)
 
-        # 3. Criar entidade
         classificacao = Classificacao(
             paciente_id=comando.paciente_id,
             sinais_vitais=sinais,
@@ -84,10 +71,8 @@ class CriarClassificacaoManipulador(ManipuladorComando):
             tipo_mudanca=TipoMudanca.AUTOMATICA,
         )
 
-        # 4. Salvar no repositório
         await self.repositorio.salvar(classificacao)
 
-        # 5. Publicar evento
         evento = ClassificacaoCriadaEvento(
             classificacao_id=str(classificacao.id),
             paciente_id=classificacao.paciente_id,
@@ -97,5 +82,4 @@ class CriarClassificacaoManipulador(ManipuladorComando):
         )
         await self.despachador.despachar(evento)
 
-        # 6. Retornar resultado
         return classificacao.para_dict()

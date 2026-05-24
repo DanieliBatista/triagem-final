@@ -108,7 +108,7 @@ def test_sinais_vitais_dentro_do_limite_biologico():
 def test_temperatura_fora_do_limite_deve_falhar():
     with pytest.raises(ValidacaoBiologicaException) as erro:
         validar_sinais_vitais(
-            temperatura=50.0, 
+            temperatura=50.0,
             pressao_sistolica=120,
             pressao_diastolica=80,
             saturacao_oxigenio=98.0,

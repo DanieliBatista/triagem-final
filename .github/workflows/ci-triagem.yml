@@ -2,18 +2,21 @@ name: CI - Triagem Service
 
 # 1. Quando este pipeline vai rodar?
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
       - develop
     paths:
-      - 'triagem-service/**' # DICA DE OURO: Só roda se alterar algo na Triagem!
+      - 'triagem-service/**'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches:
       - main
       - develop
     paths:
       - 'triagem-service/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
   # ==========================================
@@ -71,17 +74,11 @@ jobs:
           path: ./triagem-service
 
       - name: Análise no SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v7
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          args: >
-            -Dsonar.projectKey=DanieliBatista_triagem-final
-            -Dsonar.organization=danielibatista
-            -Dsonar.python.coverage.reportPaths=triagem-service/coverage.xml
-            -Dsonar.sources=triagem-service/app
-            -Dsonar.tests=triagem-service/tests
+          projectBaseDir: triagem-service
 
   # ==========================================
   # JOB 3: VERSIONAMENTO SEMÂNTICO

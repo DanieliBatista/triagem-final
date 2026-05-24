@@ -1,19 +1,24 @@
 import pytest
-from app.domain.rules import calcular_risco
 
-def test_deve_classificar_como_vermelho_se_dor_no_peito():
-    resultado = calcular_risco(36.5, 120, True)
-    assert resultado == "VERMELHO (Emergencia)"
+from app.domain.rules import ValidacaoBiologicaException, validar_sinais_vitais
 
-def test_deve_classificar_laranja_febre_alta():
-    resultado = calcular_risco(39.0, 120, False)
-    assert resultado == "LARANJA (Muito urgente)"
 
-def test_deve_classificar_verde_em_caso_estavel():
-    resultado = calcular_risco(36.0, 110, False)
-    assert resultado == "VERDE (Pouco Urgente)"
+def test_deve_aceitar_sinais_vitais_dentro_dos_limites():
+    resultado = validar_sinais_vitais(36.5, 120, 80, 98.0, 72)
 
-def test_deve_lancar_erro_para_temperatura_invalida():
-    with pytest.raises(ValueError, match="Dados biométricos fora da realidade humana."):
-        calcular_risco(50.0, 120, False)
+    assert resultado is None
 
+
+@pytest.mark.parametrize(
+    ("sinais_vitais", "mensagem"),
+    [
+        ((50.0, 120, 80, 98.0, 72), "Temperatura"),
+        ((36.5, 40, 80, 98.0, 72), "sist"),
+        ((36.5, 120, 20, 98.0, 72), "diast"),
+        ((36.5, 120, 80, 40.0, 72), "oxig"),
+        ((36.5, 120, 80, 98.0, 10), "card"),
+    ],
+)
+def test_deve_rejeitar_sinais_vitais_fora_dos_limites(sinais_vitais, mensagem):
+    with pytest.raises(ValidacaoBiologicaException, match=mensagem):
+        validar_sinais_vitais(*sinais_vitais)

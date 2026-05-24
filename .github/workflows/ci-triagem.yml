@@ -9,14 +9,14 @@ on:
       - develop
     paths:
       - 'triagem-service/**'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-triagem.yml'
   pull_request:
     branches:
       - main
       - develop
     paths:
       - 'triagem-service/**'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/ci-triagem.yml'
 
 jobs:
   # ==========================================

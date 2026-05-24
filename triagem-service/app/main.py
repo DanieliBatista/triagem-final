@@ -10,7 +10,7 @@ from app.infrastructure.clients.classificacao_client import ClassificacaoClientE
 from app.infrastructure.database import criar_tabelas
 
 # Criar tabelas no banco de dados
-criar_tabelas()
+# criar_tabelas()
 
 # FastAPI app
 app = FastAPI(

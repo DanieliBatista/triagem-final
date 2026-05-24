@@ -1,19 +1,31 @@
-name: Ci-classificacao
+name: CI-classificacao
+
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   sonarqube:
     name: SonarQube
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
+        uses: SonarSource/sonarqube-scan-action@v8.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_CLASSIFICACAO }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=.
+            -Dsonar.projectKey=danielibatista_triagem-final_classificacao-service
+            -Dsonar.organization=danielibatista
+            -Dsonar.projectName=classificacao-service
+            -Dsonar.sources=classificacao-service/app
+            -Dsonar.tests=classificacao-service/tests
+            -Dsonar.python.coverage.reportPaths=classificacao-service/coverage.xml

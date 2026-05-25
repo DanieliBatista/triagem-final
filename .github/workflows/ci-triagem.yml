@@ -55,6 +55,7 @@ jobs:
           path: ./triagem-service/coverage.xml
 
   sonarcloud:
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:

@@ -1,15 +1,36 @@
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import Optional
 from app.infrastructure.database import engine, Base, get_db, UserTable
 from app.application.use_case import AuthUseCase 
 
-Base.metadata.create_all(bind=engine)
+docs_enabled = os.getenv("APP_ENV", "DEV").upper() != "HOMOL"
 
-app = FastAPI(title="Serviço de Autenticação - D2")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(
+    title="Serviço de Autenticação - D2",
+    docs_url="/docs" if docs_enabled else None,
+    redoc_url="/redoc" if docs_enabled else None,
+    openapi_url="/openapi.json" if docs_enabled else None,
+    lifespan=lifespan,
+)
 
 auth_use_case = AuthUseCase()
+
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {"status": "healthy", "service": "auth-service"}
+
 
 class CadastroRequest(BaseModel):
     email: str = Field(..., pattern=r'^\S+@\S+\.\S+$', description="E-mail válido")
@@ -19,23 +40,25 @@ class CadastroRequest(BaseModel):
     role: str = Field(default="PACIENTE")
     crm: Optional[str] = None
 
-@model_validator(mode='after')
-def verificar_crm_medico(self):
-    if self.role == "MEDICO" and not self.crm:
-        raise ValueError("Médicos precisam obrigatoriamente fornecer o CRM.")
-    return self
-
-class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "email": "medico@hospital.com",
                 "senha": "senha_segura123",
                 "nome": "Dr. Roberto",
                 "idade": 45,
                 "role": "MEDICO",
-                "crm": "12345-SP"
+                "crm": "12345-SP",
             }
         }
+    )
+
+    @model_validator(mode="after")
+    def verificar_crm_medico(self):
+        if self.role == "MEDICO" and not self.crm:
+            raise ValueError("Médicos precisam obrigatoriamente fornecer o CRM.")
+        return self
+
 
 class LoginRequest(BaseModel):
     email: str = Field(..., pattern=r'^\S+@\S+\.\S+$', description="E-mail válido")

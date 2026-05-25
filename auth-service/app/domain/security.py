@@ -6,8 +6,8 @@ from passlib.context import CryptContext
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "chave_secreta_do_grupo")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+SECRET_KEY = os.getenv("JWT_SECRET", os.getenv("SECRET_KEY", "chave_secreta_do_grupo"))
+ALGORITHM = os.getenv("JWT_ALGORITHM", os.getenv("ALGORITHM", "HS256"))
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

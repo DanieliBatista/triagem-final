@@ -4,7 +4,7 @@ pydantic==1.10.13
 python-dotenv==1.0.0
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-PyJWT==2.4.0
+PyJWT==2.13.0
 sqlalchemy==1.4.46
 psycopg2-binary==2.9.6
 pytest==7.4.0

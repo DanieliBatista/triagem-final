@@ -6,7 +6,7 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 PyJWT==2.4.0
 sqlalchemy==1.4.46
-psycopg2-binary==2.9.6
+psycopg2-binary==2.9.12
 pytest==7.4.0
 pytest-cov==4.1.0
 httpx==0.24.1

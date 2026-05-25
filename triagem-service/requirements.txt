@@ -8,6 +8,6 @@ PyJWT==2.4.0
 sqlalchemy==1.4.46
 psycopg2-binary==2.9.6
 pytest==7.4.0
-pytest-cov==4.1.0
+pytest-cov==7.1.0
 httpx==0.24.1
 prometheus-client==0.22.1

@@ -1,5 +1,8 @@
 """Main application para Triagem Service"""
-from fastapi import FastAPI, HTTPException, Depends, status, Request
+import time
+
+from fastapi import FastAPI, HTTPException, Depends, status, Request, Response
+from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, Counter, Histogram, generate_latest
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 
@@ -22,6 +25,31 @@ app = FastAPI(
     redoc_url="/redoc" if docs_enabled else None,
     openapi_url="/openapi.json" if docs_enabled else None,
 )
+
+metrics_registry = CollectorRegistry()
+http_requests_total = Counter(
+    "triagem_http_requests_total",
+    "Total de requisicoes HTTP do triagem-service.",
+    ["method", "path", "status"],
+    registry=metrics_registry,
+)
+http_request_duration_seconds = Histogram(
+    "triagem_http_request_duration_seconds",
+    "Duracao das requisicoes HTTP do triagem-service.",
+    ["method", "path"],
+    registry=metrics_registry,
+)
+
+
+@app.middleware("http")
+async def registrar_metricas(request: Request, call_next):
+    inicio = time.perf_counter()
+    response = await call_next(request)
+    rota = request.scope.get("route")
+    path = rota.path if rota else request.url.path
+    http_requests_total.labels(request.method, path, str(response.status_code)).inc()
+    http_request_duration_seconds.labels(request.method, path).observe(time.perf_counter() - inicio)
+    return response
 
 
 @app.on_event("startup")
@@ -162,3 +190,9 @@ async def realizar_triagem(
 async def health_check() -> Dict[str, str]:
     """Health check endpoint"""
     return {"status": "healthy", "service": "triagem-service"}
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics() -> Response:
+    """Expor metricas no formato Prometheus."""
+    return Response(generate_latest(metrics_registry), media_type=CONTENT_TYPE_LATEST)

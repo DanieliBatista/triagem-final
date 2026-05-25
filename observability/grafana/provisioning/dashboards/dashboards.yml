@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: Triagem
+    orgId: 1
+    folder: Triagem Service
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

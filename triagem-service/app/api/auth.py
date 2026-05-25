@@ -1,11 +1,9 @@
 """Autenticação JWT para Triagem Service"""
-import os
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+from app.infrastructure.config import settings
 
 _bearer = HTTPBearer()
 
@@ -17,8 +15,8 @@ def get_current_user(
     try:
         payload = jwt.decode(
             credentials.credentials,
-            JWT_SECRET,
-            algorithms=[JWT_ALGORITHM],
+            settings.JWT_SECRET,
+            algorithms=[settings.JWT_ALGORITHM],
         )
         return payload
     except jwt.ExpiredSignatureError:

@@ -60,6 +60,13 @@ def test_health_check():
     assert response.status_code == 200
     assert response.json() == {"status": "healthy", "service": "triagem-service"}
 
+def test_metricas_prometheus_sao_expostas():
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "triagem_http_requests_total" in response.text
+    assert "triagem_http_request_duration_seconds" in response.text
+
 def test_realizar_triagem_sucesso(override_use_case):
     """O Caminho Feliz: Testa toda a rota, o use_case e a regra de negócio de uma vez!"""
     payload = {

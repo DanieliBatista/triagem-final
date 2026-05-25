@@ -36,6 +36,27 @@ Servicos relevantes:
 
 O dashboard **Triagem Service** e carregado automaticamente no Grafana.
 
+## Ambientes publicados
+
+| Ambiente | Branch | URL | Swagger |
+| --- | --- | --- | --- |
+| DEV | `develop` | `https://triagem-dev-g1ao.onrender.com` | Habilitado |
+| HOMOL | `main` | `https://triagem-homol-wn9h.onrender.com` | Desabilitado |
+
+Validacao de DEV:
+
+```text
+GET https://triagem-dev-g1ao.onrender.com/health -> 200 healthy
+GET https://triagem-dev-g1ao.onrender.com/docs   -> 200
+```
+
+Validacao de HOMOL:
+
+```text
+GET https://triagem-homol-wn9h.onrender.com/health -> 200 healthy
+GET https://triagem-homol-wn9h.onrender.com/docs   -> 404
+```
+
 ## Autenticacao para testar a triagem
 
 No Swagger do `auth-service`, use primeiro `POST /v1/auth/cadastro` caso ainda

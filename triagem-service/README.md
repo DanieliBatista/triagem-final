@@ -10,7 +10,7 @@ trabalho anterior e fornece o JWT consumido por esta API.
 | --- | --- |
 | Git Flow | Fluxo previsto com `main` (HOMOL), `develop` (DEV) e `feature/*` |
 | CI: build, testes e SonarCloud | `.github/workflows/ci-triagem.yml` |
-| CD: `develop` para DEV e `main` para HOMOL | Webhooks Render no mesmo workflow |
+| CD: `develop` para DEV e `main` para HOMOL | Auto-Deploy do Render conectado as branches |
 | Swagger por ambiente | `APP_ENV=DEV` habilita; `APP_ENV=HOMOL` desabilita |
 | Containerizacao e publicacao | `triagem-service/Dockerfile` e imagem em GHCR |
 | Versionamento | `VERSION` e tags `triagem-vX.Y.Z` (Semantic Versioning) |
@@ -67,16 +67,16 @@ triagem publicada, configure no Render o mesmo segredo e algoritmo:
 
 ## Deploy no Render
 
-Cadastre os seguintes secrets no GitHub:
+Cadastre no GitHub o secret usado pela analise:
 
 | Secret | Finalidade |
 | --- | --- |
 | `SONAR_TOKEN_TRIAGEM` | Analise SonarCloud |
-| `RENDER_DEPLOY_HOOK_TRIAGEM_DEV` | Deploy automatico apos push em `develop` |
-| `RENDER_DEPLOY_HOOK_TRIAGEM_HOMOL` | Deploy automatico apos push em `main` |
 
-No servico Render de DEV use `APP_ENV=DEV`. No servico de HOMOL use
-`APP_ENV=HOMOL`, o que remove `/docs`, `/redoc` e `/openapi.json`.
+No Render, conecte o servico DEV a branch `develop` e o servico HOMOL a
+branch `main`, ambos com **Auto-Deploy** habilitado. No servico DEV use
+`APP_ENV=DEV`. No servico HOMOL use `APP_ENV=HOMOL`, o que remove `/docs`,
+`/redoc` e `/openapi.json`.
 
 Para publicar uma versao da imagem, crie uma tag no formato
 `triagem-v1.0.0`. O pipeline publica as tags de branch, commit e versao no

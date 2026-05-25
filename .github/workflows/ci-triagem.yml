@@ -117,21 +117,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-  deploy-dev:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    needs: [sonarcloud, publish-image]
-    runs-on: ubuntu-latest
-    environment: DEV
-    steps:
-      - name: Trigger Render DEV deploy
-        run: curl --fail-with-body --request POST "${{ secrets.RENDER_DEPLOY_HOOK_TRIAGEM_DEV }}"
-
-  deploy-homol:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [sonarcloud, publish-image]
-    runs-on: ubuntu-latest
-    environment: HOMOL
-    steps:
-      - name: Trigger Render HOMOL deploy
-        run: curl --fail-with-body --request POST "${{ secrets.RENDER_DEPLOY_HOOK_TRIAGEM_HOMOL }}"

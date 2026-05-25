@@ -7,17 +7,27 @@ from app.api.auth import obter_usuario_atual
 from app.application.use_cases import RealizarTriagemUseCase
 from app.domain.rules import ValidacaoBiologicaException
 from app.infrastructure.clients.classificacao_client import ClassificacaoClientException
+from app.infrastructure.config import settings
 from app.infrastructure.database import criar_tabelas
 
-# Criar tabelas no banco de dados
-# criar_tabelas()
+
+docs_enabled = settings.APP_ENV != "HOMOL"
 
 # FastAPI app
 app = FastAPI(
     title="Microsserviço de Triagem",
     description="Serviço responsável por coletar sinais vitais iniciais e solicitar classificação",
     version="1.0.0",
+    docs_url="/docs" if docs_enabled else None,
+    redoc_url="/redoc" if docs_enabled else None,
+    openapi_url="/openapi.json" if docs_enabled else None,
 )
+
+
+@app.on_event("startup")
+def inicializar_banco() -> None:
+    """Criar a tabela da Triagem no banco configurado ao iniciar o serviço."""
+    criar_tabelas()
 
 
 # Pydantic Models

@@ -6,6 +6,9 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     """Configurações da aplicação de Triagem"""
 
+    # Ambiente
+    APP_ENV: str = os.getenv("APP_ENV", "DEV").upper()
+
     # Database
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",

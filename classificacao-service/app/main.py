@@ -7,6 +7,9 @@ from app.infrastructure.database import criar_tabelas
 from app.infrastructure.config import settings
 
 
+docs_enabled = settings.APP_ENV != "HOMOL"
+
+
 # Lifespan para inicialização
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +30,9 @@ app = FastAPI(
     description="Microsserviço CQRS para gestão de classificações (Protocolo de Manchester)",
     version="2.0.0",
     lifespan=lifespan,
+    docs_url="/docs" if docs_enabled else None,
+    redoc_url="/redoc" if docs_enabled else None,
+    openapi_url="/openapi.json" if docs_enabled else None,
 )
 
 # CORS
@@ -55,16 +61,21 @@ def health():
 # Root endpoint
 @app.get("/")
 def root():
+    endpoints = {
+        "health": "/health",
+        "classificacoes": "/v1/classificacoes",
+    }
+    if docs_enabled:
+        endpoints.update({
+            "api_docs": "/docs",
+            "redoc": "/redoc",
+        })
+
     return {
         "servico": "MedSync – Classificação",
         "versao": "2.0.0",
         "descricao": "Serviço de gestão de classificações com padrão CQRS",
-        "endpoints": {
-            "health": "/health",
-            "api_docs": "/docs",
-            "redoc": "/redoc",
-            "classificacoes": "/v1/classificacoes",
-        }
+        "endpoints": endpoints,
     }
 
 

@@ -1,8 +1,9 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
+    APP_ENV: str = os.getenv("APP_ENV", "DEV").upper()
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
         "sqlite:///./classificacao.db"

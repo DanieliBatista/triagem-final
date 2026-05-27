@@ -6,3 +6,7 @@ scrape_configs:
     metrics_path: "/metrics"
     static_configs:
       - targets: ["d1:8000"]
+  - job_name: "classificacao-service"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["d4:8000"]

@@ -70,7 +70,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_PRONTUARIO}}
         with:
           args: >
-            -Dsonar.projectKey=danielibatista_triagem-final_classificacao-service
+            -Dsonar.projectKey=danielibatista_triagem-final_prontuario-service
             -Dsonar.organization=danielibatista
             -Dsonar.projectName=prontuario-service
             -Dsonar.sources=prontuario-service/src

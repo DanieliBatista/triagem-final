@@ -24,3 +24,19 @@ updates:
     directory: "/prontuario-service"
     schedule:
       interval: "weekly"    
+
+  - package-ecosystem: "pip"
+    directory: "/classificacao-service"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "03:00"
+    pull-request-branch-name:
+      separator: "/"
+ 
+  - package-ecosystem: "docker"
+    directory: "/classificacao-service"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"

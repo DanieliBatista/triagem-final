@@ -66,7 +66,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{service=\"classificacao-service\"}[5m]))",
+          "expr": "sum(rate(classificacao_http_requests_total[5m]))",
           "legendFormat": "Taxa de Requisições",
           "refId": "A"
         }
@@ -140,12 +140,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"classificacao-service\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(classificacao_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
           "legendFormat": "p95",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"classificacao-service\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(classificacao_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
           "legendFormat": "p99",
           "refId": "B"
         }

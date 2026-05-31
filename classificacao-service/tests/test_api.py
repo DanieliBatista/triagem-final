@@ -22,11 +22,11 @@ def test_health():
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json()["versao"] == "2.0.0"
+    assert response.json()["versao"] == "1.0.0"
 
 
 @patch("app.api.routes.RepositorioClassificacao")
-@patch("app.api.routes.DespachadorEventosMock")
+@patch("app.infrastructure.despachador_eventos.DespachadorEventosMock")
 @patch("app.api.routes.ArmazenadorEventos")
 def test_criar_classificacao(mock_store, mock_desp, mock_repo):
     mock_repo_instance = AsyncMock()

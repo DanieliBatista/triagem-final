@@ -129,7 +129,7 @@ jobs:
     steps:
       - name: Trigger Render deploy (DEV)
         run: |
-          curl -s -X POST "${{ secrets.RENDER_DEPLOY_URL_CLASSIFICACAO_DEV }}" \
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_DEV }}" \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
 
   # Deploy HOMOL (main -> Render)
@@ -140,5 +140,5 @@ jobs:
     steps:
       - name: Trigger Render deploy (HOMOL)
         run: |
-          curl -s -X POST "${{ secrets.RENDER_DEPLOY_URL_CLASSIFICACAO_HOMOL }}" \
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_HOMOL }}" \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"

@@ -40,6 +40,8 @@ jobs:
           pip install pytest pytest-cov httpx
 
       - name: Run tests and coverage
+        env:
+          DATABASE_URL: sqlite:///:memory:
         run: |
           python -m pytest tests/ --cov=src --cov-report=xml
 
@@ -50,6 +52,7 @@ jobs:
           path: ./prontuario-service/coverage.xml
 
   sonarcloud:
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
@@ -67,7 +70,7 @@ jobs:
       - name: SonarCloud Analysis
         uses: SonarSource/sonarqube-scan-action@v8.1.0
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_PRONTUARIO}}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_PRONTUARIO }}
         with:
           args: >
             -Dsonar.projectKey=danielibatista_triagem-final_prontuario-service

@@ -125,12 +125,10 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     needs: publish-image
     runs-on: ubuntu-latest
-    environment: DEV
     steps:
       - name: Trigger Render deploy (DEV)
         run: |
-          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_DEV }}" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_DEV }}"
 
   # Deploy HOMOL (main -> Render)
   deploy-homol:
@@ -140,5 +138,4 @@ jobs:
     steps:
       - name: Trigger Render deploy (HOMOL)
         run: |
-          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_HOMOL }}" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_CLASSIFICACAO_HOMOL }}"

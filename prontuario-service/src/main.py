@@ -33,7 +33,7 @@ def criar_prontuario(
     db: Session = Depends(get_db)
 ):
     try:
-        resultado = use_case.registrar_atendimento(db, dados.model_dump(), role)
+        resultado = use_case.registrar_atendimento(db, dados.dict(), role)
         return {"status": "Sucesso", "data": resultado}
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))

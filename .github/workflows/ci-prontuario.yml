@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests and coverage
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           python -m pytest tests/ --cov=src --cov-report=xml
 

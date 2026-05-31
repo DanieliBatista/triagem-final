@@ -7,8 +7,11 @@ from src.infrastructure.auth import get_current_user_role
 from pydantic import BaseModel
 from typing import List
 Base.metadata.create_all(bind=engine)
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Microsserviço de Prontuário e Histórico Médico")
+
+Instrumentator().instrument(app).expose(app)
 
 repo = ProntuarioRepository()
 use_case = ProntuarioUseCase(repo)
@@ -30,7 +33,7 @@ def criar_prontuario(
     db: Session = Depends(get_db)
 ):
     try:
-        resultado = use_case.registrar_atendimento(db, dados.model_dump(), role)
+        resultado = use_case.registrar_atendimento(db, dados.dict(), role)
         return {"status": "Sucesso", "data": resultado}
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))

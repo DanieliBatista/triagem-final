@@ -3,6 +3,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
+    HOST: str = os.getenv("HOST", "127.0.0.1")
     APP_ENV: str = os.getenv("APP_ENV", "DEV").upper()
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",

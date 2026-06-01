@@ -7,3 +7,10 @@ providers:
     type: file
     options:
       path: /var/lib/grafana/dashboards
+
+  - name: Classificação Service
+    orgId: 1
+    folder: Classificação Service
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/classificacao-service.json

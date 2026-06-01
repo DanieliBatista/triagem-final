@@ -5,7 +5,7 @@ from app.domain.entities import Triage
 
 logger = logging.getLogger(__name__)
 
-EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "http://event-bus-service:8001/events")
+EVENT_BUS_URL = os.getenv("EVENT_BUS_URL", "https://event-bus-service:8001/events")
 
 
 async def publish_triage_completed(triage: Triage) -> None:

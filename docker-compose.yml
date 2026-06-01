@@ -86,6 +86,7 @@ services:
     ports:
       - "8080:8000"
     environment:
+      APP_ENV: ${PRONTUARIO_APP_ENV:-DEV}
       DATABASE_URL: ${PRONTUARIO_DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ALGORITHM: ${JWT_ALGORITHM}

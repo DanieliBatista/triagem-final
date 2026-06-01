@@ -6,11 +6,18 @@ providers:
     folder: Triagem Service
     type: file
     options:
-      path: /var/lib/grafana/dashboards
+      path: /var/lib/grafana/dashboards/triagem-service.json
 
-  - name: Classificação Service
+  - name: Classificacao Service
     orgId: 1
-    folder: Classificação Service
+    folder: Classificacao Service
     type: file
     options:
       path: /var/lib/grafana/dashboards/classificacao-service.json
+
+  - name: Prontuario Service
+    orgId: 1
+    folder: Prontuario Service
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/prontuario-service.json

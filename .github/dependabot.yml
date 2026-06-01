@@ -10,11 +10,6 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-
   - package-ecosystem: "pip"
     directory: "/prontuario-service"
     schedule:
@@ -23,27 +18,18 @@ updates:
   - package-ecosystem: "docker"
     directory: "/prontuario-service"
     schedule:
-      interval: "weekly"    
+      interval: "weekly"
 
   - package-ecosystem: "pip"
     directory: "/classificacao-service"
     schedule:
       interval: "weekly"
-      day: "tuesday"
-      time: "03:00"
-    pull-request-branch-name:
-      separator: "/"
- 
-  - package-ecosystem: "pip"
-    directory: "/classificacao-service"
-    schedule:
-      interval: "weekly"
- 
+
   - package-ecosystem: "docker"
     directory: "/classificacao-service"
     schedule:
       interval: "weekly"
- 
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

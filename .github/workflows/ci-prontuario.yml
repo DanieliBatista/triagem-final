@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - develop
+    tags:
+      - 'prontuario-v*'
     paths:
       - 'prontuario-service/**'
       - '.github/workflows/ci-prontuario.yml'
@@ -45,6 +47,9 @@ jobs:
         run: |
           python -m pytest tests/ --cov=src --cov-report=xml
 
+      - name: Build Docker image
+        run: docker build --tag prontuario-service:${{ github.sha }} .
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
@@ -79,3 +84,39 @@ jobs:
             -Dsonar.sources=prontuario-service/src
             -Dsonar.tests=prontuario-service/tests
             -Dsonar.python.coverage.reportPaths=prontuario-service/coverage.xml
+
+  publish-image:
+    if: github.event_name == 'push'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/prontuario-service
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=match,pattern=prontuario-v(.*),group=1
+
+      - name: Build and publish Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./prontuario-service
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

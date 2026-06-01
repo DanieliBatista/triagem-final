@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, JSON
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/auth_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/prontuario_db")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

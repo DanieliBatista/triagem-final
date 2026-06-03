@@ -13,7 +13,7 @@ from app.infrastructure.clients.classificacao_client import ClassificacaoClientE
 from app.infrastructure.config import settings
 from app.infrastructure.database import criar_tabelas
 
-
+#....
 docs_enabled = settings.APP_ENV != "HOMOL"
 
 # FastAPI app

@@ -72,14 +72,14 @@ classificacao-service/
 
 Validação de DEV:
 ```
-GET <URL_DEV>/health  → 200 {"status": "ok"}
-GET <URL_DEV>/docs    → 200
+GET <https://classificacao-dev-36y9.onrender.com/health>/health  → 200 {"status": "ok"}
+GET <https://classificacao-dev-36y9.onrender.com/docs#/>/docs    → 200
 ```
 
 Validação de HOMOL:
 ```
-GET <URL_HOMOL>/health → 200 {"status": "ok"}
-GET <URL_HOMOL>/docs   → 404
+GET <https://classificacao-homol.onrender.com/health>/health → 200 {"status": "ok"}
+GET <https://classificacao-homol.onrender.com/docs>   → 404
 ```
 
 ---

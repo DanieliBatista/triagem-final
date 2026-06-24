@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: triagem-service
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: triagem-service
+    app.kubernetes.io/part-of: medsync
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8000"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: triagem-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

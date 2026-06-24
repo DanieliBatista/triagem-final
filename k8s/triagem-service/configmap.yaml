@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: triagem-service-config
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: triagem-service
+    app.kubernetes.io/part-of: medsync
+data:
+  APP_ENV: "DEV"
+  SQLALCHEMY_ECHO: "false"
+  JWT_ALGORITHM: "HS256"
+  JWT_EXPIRATION_HOURS: "24"
+  CLASSIFICACAO_SERVICE_URL: "http://classificacao-service:8000"
+  LOG_LEVEL: "INFO"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: medsync
+data:
+  APP_ENV: "DEV"
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "60"

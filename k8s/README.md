@@ -9,6 +9,7 @@ observabilidade (Prometheus + Grafana).
 k8s/
 ├── namespace.yaml              # namespace medsync (app)
 ├── infra/                      # Postgres + RabbitMQ compartilhados
+├── auth-service/               # microsservico de autenticacao (2 replicas)
 ├── triagem-service/            # microsservico de triagem (2 replicas)
 ├── classificacao-service/      # microsservico de classificacao (2 replicas)
 ├── prontuario-service/         # microsservico de prontuario (2 replicas)
@@ -40,11 +41,13 @@ kubectl -n medsync rollout status deployment/postgres
 kubectl -n medsync rollout status deployment/rabbitmq
 
 # 4. Build das imagens dentro do Minikube
+minikube image build -t auth-service:local ./auth-service
 minikube image build -t triagem-service:local ./triagem-service
 minikube image build -t classificacao-service:local ./classificacao-service
 minikube image build -t prontuario-service:local ./prontuario-service
 
 # 5. Microsservicos
+kubectl apply -f k8s/auth-service/
 kubectl apply -f k8s/triagem-service/
 kubectl apply -f k8s/classificacao-service/
 kubectl apply -f k8s/prontuario-service/

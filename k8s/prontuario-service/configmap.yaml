@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prontuario-service-config
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: prontuario-service
+    app.kubernetes.io/part-of: medsync
+data:
+  APP_ENV: "DEV"
+  JWT_ALGORITHM: "HS256"

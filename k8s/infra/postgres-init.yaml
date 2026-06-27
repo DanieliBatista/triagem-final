@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: medsync
+data:
+  init.sql: |
+    CREATE DATABASE triagem_db;
+    CREATE DATABASE classificacao_db;
+    CREATE DATABASE prontuario_db;
+    CREATE DATABASE auth_db;

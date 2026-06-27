@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: classificacao-service
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: classificacao-service
+    app.kubernetes.io/part-of: medsync
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: classificacao.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: classificacao-service
+                port:
+                  name: http

@@ -1,0 +1,197 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-admin
+  namespace: monitoring
+type: Opaque
+stringData:
+  GF_SECURITY_ADMIN_USER: "admin"
+  GF_SECURITY_ADMIN_PASSWORD: "admin"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: monitoring
+data:
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: MedSync
+        orgId: 1
+        folder: MedSync
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+data:
+  classificacao-service.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "id": 1,
+          "targets": [
+            { "expr": "sum(rate(classificacao_http_requests_total[5m]))", "legendFormat": "requisicoes/s" }
+          ],
+          "title": "Taxa de Requisicoes (req/s)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "ms" } },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "id": 2,
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum(rate(classificacao_http_request_duration_seconds_bucket[5m])) by (le)) * 1000", "legendFormat": "p95" },
+            { "expr": "histogram_quantile(0.99, sum(rate(classificacao_http_request_duration_seconds_bucket[5m])) by (le)) * 1000", "legendFormat": "p99" }
+          ],
+          "title": "Latencia (p95, p99)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "short" } },
+          "gridPos": { "h": 6, "w": 12, "x": 0, "y": 8 },
+          "id": 3,
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+          "targets": [
+            { "expr": "count(count by (pod) (classificacao_http_requests_total))", "legendFormat": "Pods ativos" }
+          ],
+          "title": "Pods Respondendo (replicas)",
+          "type": "stat"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": ["classificacao-service", "medsync"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "timezone": "browser",
+      "title": "Classificacao Service",
+      "uid": "classificacao-service",
+      "version": 1
+    }
+  triagem-service.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "id": 1,
+          "targets": [
+            { "expr": "sum(rate(triagem_http_requests_total[5m]))", "legendFormat": "requisicoes/s" }
+          ],
+          "title": "Taxa de requisicoes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "id": 2,
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum(rate(triagem_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }
+          ],
+          "title": "Latencia p95",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "id": 3,
+          "targets": [
+            { "expr": "sum by (status) (rate(triagem_http_requests_total{status=~\"4..|5..\"}[5m]))", "legendFormat": "{{status}}" }
+          ],
+          "title": "Erros HTTP",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": ["triagem-service", "medsync"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "timezone": "browser",
+      "title": "Triagem Service",
+      "uid": "triagem-service",
+      "version": 1
+    }
+  prontuario-service.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "id": 1,
+          "targets": [
+            { "expr": "sum(rate(http_requests_total{job=\"prontuario-service\"}[5m]))", "legendFormat": "requisicoes/s" }
+          ],
+          "title": "Taxa de requisicoes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "id": 2,
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"prontuario-service\"}[5m])) by (le))", "legendFormat": "p95" }
+          ],
+          "title": "Latencia p95",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "id": 3,
+          "targets": [
+            { "expr": "sum by (status) (rate(http_requests_total{job=\"prontuario-service\", status=~\"4..|5..\"}[5m]))", "legendFormat": "{{status}}" }
+          ],
+          "title": "Erros HTTP",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": ["prontuario-service", "medsync"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "timezone": "browser",
+      "title": "Prontuario Service",
+      "uid": "prontuario-service",
+      "version": 1
+    }

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: classificacao-service-config
+  namespace: medsync
+  labels:
+    app.kubernetes.io/name: classificacao-service
+    app.kubernetes.io/part-of: medsync
+data:
+  APP_ENV: "DEV"
+  SQLALCHEMY_ECHO: "false"
+  JWT_ALGORITHM: "HS256"
+  JWT_EXPIRATION_HOURS: "24"
+  CRITICAL_CAPACITY_LIMIT: "10"
+  TRIAGE_VALIDITY_HOURS: "4"
+  RABBITMQ_EXCHANGE: "classificacao_events"
+  RABBITMQ_QUEUE: "queue.classificacao"
+  LOG_LEVEL: "INFO"

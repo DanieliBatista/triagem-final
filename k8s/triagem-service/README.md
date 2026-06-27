@@ -1,8 +1,5 @@
 # Triagem Service no Kubernetes
 
-Esta pasta contem os manifests da parte do `triagem-service` para o Trabalho
-Pratico 3.
-
 ## Arquivos
 
 | Arquivo | Funcao |

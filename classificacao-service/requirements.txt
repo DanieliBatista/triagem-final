@@ -7,7 +7,7 @@ python-multipart==0.0.6
 python-jose[cryptography]==3.3.0
 PyJWT==2.4.0
 bcrypt==3.2.2
-aio-pika==8.2.2
+aio-pika==9.6.2
 pytest==7.4.0
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
